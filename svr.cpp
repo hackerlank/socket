@@ -25,6 +25,22 @@ int main()
 	struct sockaddr_in cliaddr, servaddr;
 
 	// 1 socket
+	// 参数一：socket family:
+	// 1 IPv4 -> AF_INET
+	// 2 IPv6 -> AF_INET6
+	// 3 路由 -> AF_ROUTE，看上去似乎是路由器之类的基础接口? 必须了解清楚，todo
+	// ...还有 Unix 域、密钥 等协议——为什么它们会是一个层级的，后文称它们为地址族
+	// 参数二：socket type:
+	// 1 SOCK_STREAM TCP 字节流套接口
+	// 2 SOCK_DGRAM UDP
+	// 3 SOCK_SEQPACKET SCTP
+	// 4 SOCK_RAW 原始套接口
+	// 通常来说，参数一和参数二的组合能够得到一个缺省值（也许就是参数二），在参数二中已写好
+	// 但还是可以在在参数三中指定是那种协议；但为什么要这么做，指定字节流套接口，能服进行 UDP 协议？
+	// 参数三：protocol:
+	// 1 IPPROTO_TCP
+	// 2 IPPROTO_UDP
+	// 3 IPPROTO_SCTP
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
 
 	bzero(&servaddr, sizeof(servaddr));
