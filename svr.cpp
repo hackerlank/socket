@@ -32,7 +32,7 @@ int main()
 	// ...还有 Unix 域、密钥 等协议——为什么它们会是一个层级的，后文称它们为地址族
 	// 参数二：socket type:
 	// 1 SOCK_STREAM TCP 字节流套接口
-	// 2 SOCK_DGRAM UDP
+	// 2 SOCK_DGRAM UDP 套接口
 	// 3 SOCK_SEQPACKET SCTP
 	// 4 SOCK_RAW 原始套接口
 	// 通常来说，参数一和参数二的组合能够得到一个缺省值（也许就是参数二），在参数二中已写好
