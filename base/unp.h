@@ -9,6 +9,7 @@
 //#include <sys/ioctl.h>
 //#include <sys/filio.h>
 #include <unistd.h>
+#include "base.h"
 
 #ifndef HAVE_BZERO
 #define bzero(ptr, n) memset(ptr, 0, n)
