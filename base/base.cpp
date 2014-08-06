@@ -7,7 +7,12 @@ int Close(int sockfd)
 	return(n);
 }
 
-ssize_t writen
+ssize_t writen(int sockfd, const void* vptr, size_t n)
+{
+	size_t	nleft;
+	ssize_t nwritten;
+	const char
+}
 
 int Write(int sockfd, const void*vptr, szie_t n)
 {

@@ -37,13 +37,6 @@ int main(nt argc, char **argv)
 	}
 }
 
-ssize_t writen(int sockfd, const void* vptr, size_t n)
-{
-	size_t	nleft;
-	ssize_t nwritten;
-	const char
-}
-
 // 此处的 host name 也可以是 ipaddress，szServName 也可以是 port
 int Tcp_connect(const char* szHostName, const char* szServName)
 {
