@@ -31,10 +31,23 @@ int main(nt argc, char **argv)
 				// 发起链接，当有套接字链接成功，则返回成功的套接字
 				fd = Tcp_connect(argv[1], argv[2]);
 				Write(fd, request, strlen(request));
-				/* if((n = Readn)) */
+				if((n = Readn(fd, reply, nbytes)) != nbytes)	// 假设服务器是个回射服务器
+					err_quit("server returned %d bytes", n);
+
+				Close(fd);
 			}
+			printf("child %d done\n", i);
+			exit(0);	// 子进程僵死
 		}
 	}
+
+	while(wait(NULL) > 0)
+		;
+
+	if (errno != ECHILD)
+		err_sys("wait error");
+
+	exit();
 }
 
 // 此处的 host name 也可以是 ipaddress，szServName 也可以是 port
