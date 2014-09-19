@@ -1,4 +1,4 @@
-#include "unp.h"
+#include "../base/unp.h"
 
 using namespace std;
 
@@ -58,11 +58,15 @@ int main()
 		clilen = sizeof(cliaddr);
 		// 4 accept
 		connfd = accept(listenfd, (struct sockaddr *)&cliaddr, &clilen);
+		printf("-------> accept one client \n");
 
 		// fork: 线程
 		if ((childpid = fork()) == 0) {
+			printf("-------> echo one client\n");
+
 			close(listenfd);
 			str_echo(connfd);
+			/* close(connfd); */
 			exit(0);
 		}
 

@@ -83,6 +83,7 @@ int main(int argc, char **argv)
 		if ((pid = Fork()) == 0) {
 			for (j = 0; j < nloops; j++) {
 				// 发起链接，当有套接字链接成功，则返回成功的套接字
+				printf("-------------> Send One TCP Connect");
 				fd = Tcp_connect(argv[1], argv[2]);
 				Write(fd, request, strlen(request));
 				if((n = Readn(fd, reply, nbytes)) != nbytes)	// 假设服务器是个回射服务器
