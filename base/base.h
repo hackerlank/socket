@@ -23,4 +23,8 @@ void Pthread_mutex_lock(pthread_mutex_t *mptr)
 */
 int Close(int sockfd);
 
-int Write(int sockfd, )
+int Write(int sockfd, const void*vptr, size_t n);
+
+int Fork();
+
+int Readn(int sockfd, void* vptr, size_t n);

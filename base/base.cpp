@@ -1,3 +1,5 @@
+#include "unp.h"
+
 int Close(int sockfd)
 {
 	int n;
@@ -7,13 +9,22 @@ int Close(int sockfd)
 	return(n);
 }
 
+int Fork()
+{
+	int n;
+	if ((n = fork()) < 0)
+		err_sys("socket error");
+
+	return (n);
+}
+
 ssize_t writen(int sockfd, const void* vptr, size_t n)
 {
 	size_t	nleft;
 	ssize_t nwritten;
-	const char *ptr;
+	const char* ptr;
 
-	ptr = vptr;
+	ptr = (const char*)vptr;
 	nleft = n;
 	while(nleft > 0)
 	{
@@ -22,7 +33,6 @@ ssize_t writen(int sockfd, const void* vptr, size_t n)
 				nwritten = 0;
 			else
 				return -1;
-			end	
 		}
 
 		nleft -= nwritten;
@@ -32,7 +42,7 @@ ssize_t writen(int sockfd, const void* vptr, size_t n)
 	return n;
 }
 
-int Write(int sockfd, const void*vptr, szie_t n)
+int Write(int sockfd, const void*vptr, size_t n)
 {
 	int nWriten;
 	if ((nWriten = writen(sockfd, vptr, n)) < 0)
@@ -51,7 +61,7 @@ ssize_t readn(int sockfd, void* vptr, size_t n)
 	while (nleft > 0)
 	{
 		if ((nreadn = read(sockfd, ptr, nleft)) < 0) {
-			if errno == EINTR 
+			if (errno == EINTR) 
 				nreadn = 0;
 			else
 				return -1;

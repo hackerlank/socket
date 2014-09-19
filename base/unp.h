@@ -6,6 +6,7 @@
 #include <netinet/in.h> // base struct
 #include <sys/socket.h> // base function
 #include <string.h>
+#include <netdb.h>
 //#include <sys/ioctl.h>
 //#include <sys/filio.h>
 #include <unistd.h>
@@ -20,5 +21,9 @@
 #define MAXLINE 4096
 
 void err_sys(const char *fmt, ...);
+void err_dump(const char* fmt, ...);
+void err_quit(const char* fmt, ...);
+void err_msg(const char* fmt, ...);
+static void err_doit(int errnoflag, int level, const char *fmt, va_list ap);
 
 #endif

@@ -10,7 +10,7 @@ static void err_doit(int, int, const char*, va_list);
 // err_doit 则展示了 vnspritf
 int FindMax(int n, ...)
 {
-	int i
+	int i;
 	va_list ap;
 	va_start(ap, n);
 	int largest = va_arg(ap, int);	// 沿着 ap，向后移 int 对应的位数
