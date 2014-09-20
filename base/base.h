@@ -36,5 +36,7 @@ int Listen(int listenfd, int backlog);
 void* Malloc(int nsize);
 
 typedef void Sigfunc(int);
+void sig_chld(int signo);
+void sig_int(int signo);
 Sigfunc* signal(int signo, Sigfunc *func);
 Sigfunc* Signal(int signo, Sigfunc *func);

@@ -60,7 +60,7 @@ int Tcp_connect(const char* szHostName, const char* szServName)
 
 int main(int argc, char **argv)
 {
-	// cout << "hello word" << endl;
+	printf("hello world");
 	int i, j, fd, nchildren, nloops, nbytes;
 	pid_t pid;
 	ssize_t n;
@@ -77,8 +77,11 @@ int main(int argc, char **argv)
 	nbytes = atoi(argv[5]);
 	snprintf(request, sizeof(request), "%d\n", nbytes);
 
+	Signal(SIGCHLD, sig_chld);
+	Signal(SIGINT, sig_int);
 	for (i = 0; i < nchildren; i++)
 	{
+		printf("fork one");
 		// 发起子进程
 		if ((pid = Fork()) == 0) {
 			for (j = 0; j < nloops; j++) {
@@ -96,11 +99,11 @@ int main(int argc, char **argv)
 		}
 	}
 
-	while(wait(NULL) > 0)
-		;
+	/* while(wait(NULL) > 0) */
+	/* 	; */
 
-	if (errno != ECHILD)
-		err_sys("wait error");
+	/* if (errno != ECHILD) */
+	/* 	err_sys("wait error"); */
 
 	exit(1);
 }

@@ -60,22 +60,6 @@ int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 	return (listenfd);
 }
 
-void sig_chld(int signo)
-{
-	pid_t pid;
-	int stat;
-
-	while((pid = waitpid(-1, &stat, WNOHANG)) > 0)
-		printf("child %d terminated\n", pid);
-
-	return;
-}
-
-void sig_int(int signo)
-{
-	exit(0);
-}
-
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
@@ -104,8 +88,10 @@ int main(int argc, char **argv)
 				err_sys("accept err");
 		}
 
+		printf("-------> Get Client: Accept");
 		if ((childpid = Fork()) == 0) { /*child process*/
 			Close(listenfd);
+			printf("-------> Get Client: echo");
 			str_echo(connfd);
 			exit(0);
 		}
