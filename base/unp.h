@@ -10,7 +10,9 @@
 //#include <sys/ioctl.h>
 //#include <sys/filio.h>
 #include <unistd.h>
+#include <signal.h>
 #include "base.h"
+
 
 #ifndef HAVE_BZERO
 #define bzero(ptr, n) memset(ptr, 0, n)
@@ -25,5 +27,6 @@ void err_dump(const char* fmt, ...);
 void err_quit(const char* fmt, ...);
 void err_msg(const char* fmt, ...);
 static void err_doit(int errnoflag, int level, const char *fmt, va_list ap);
+
 
 #endif

@@ -28,3 +28,13 @@ int Write(int sockfd, const void*vptr, size_t n);
 int Fork();
 
 int Readn(int sockfd, void* vptr, size_t n);
+
+int Setsockopt(int listenfd, int level, int optname, const void* optval, socklen_t optlen);
+
+int Listen(int listenfd, int backlog);
+	
+void* Malloc(int nsize);
+
+typedef void Sigfunc(int);
+Sigfunc* signal(int signo, Sigfunc *func);
+Sigfunc* Signal(int signo, Sigfunc *func);

@@ -17,7 +17,7 @@ int Tcp_connect(const char* szHostName, const char* szServName)
 	// 此处 getaddrinfo 将会依据 host name, server name 以及 hints 的信息，返回一组 addrinfo 的值——都以 hints 为模板
 	// struct addrinfo {
 	//	int	ai_flags; 常用的两个值 AI_PASSIVE 和 AI_CANONNAME，前者告知函数被动打开套接口，后者则是告知函数返回主机的规范名
-	//	int ai_family;	后面三个参数都在 socket 中介绍过
+	//	int ai_family;	后面三个参数都在 socket 中介绍过(参见 svr1.cpp )
 	//	int ai_socktype;
 	//	int ai_protocol;
 	//	socklen_t ai_addrlen; 后面 ai_addr 指针指向的 socketaddr 对象的大小，为 16

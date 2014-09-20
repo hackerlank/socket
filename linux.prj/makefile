@@ -4,7 +4,7 @@ OBJ_DIR = ./obj
 APP_DIR = ./app
 
 
-all: client svr1
+all: client svr1 svr2
 .PHONY:all
 
 client: client.o base error
@@ -18,6 +18,12 @@ svr1: svr1.o base error
 
 svr1.o: $(SRC_DIR)/svr/svr1.cpp
 	cc -c $(SRC_DIR)/svr/svr1.cpp -o $(OBJ_DIR)/svr1.o
+
+svr2: svr2.o base error
+	cc -o $(APP_DIR)/svr2.app $(OBJ_DIR)/svr2.o $(OBJ_DIR)/base.o $(OBJ_DIR)/error.o
+
+svr2.o: $(SRC_DIR)/svr/svr2.cpp
+	cc -c $(SRC_DIR)/svr/svr2.cpp -o $(OBJ_DIR)/svr2.o
 
 base: $(SRC_DIR)/base/unp.h $(SRC_DIR)/base/base.cpp
 	cc -c $(SRC_DIR)/base/base.cpp -o $(OBJ_DIR)/base.o
