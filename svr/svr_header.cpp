@@ -1,3 +1,5 @@
+#include "svr_header.h"
+
 // 此处的 host 也可以是 ipaddress，如果为 null 则是本机 127.0.0.1，szServName 也可以是 port
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 {
@@ -41,6 +43,25 @@ int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 	return (listenfd);
 }
 
+void child_main(int i, int listenfd, int addrlen)
+{
+	int connfd;
+	socklen_t clilen;
+	struct sockaddr* cliaddr;
+
+	cliaddr = (sockaddr*)Malloc(addrlen);
+	printf("%d : child %ld starting\n", i, (long)getpid());
+	for (;;)
+	{
+		clilen = addrlen;
+		connfd = Accept(listenfd, cliaddr, &clilen);
+		printf("%d : %ld : Accept one client \n", i, (long)getpid());
+		str_echo(connfd);
+		Close(connfd);
+		printf("%d : %ld : Close one client \n", i, (long)getpid());
+	}
+}
+
 pid_t child_make(int i, int listenfd, int addrlen)
 {
 	pid_t pid;
@@ -52,32 +73,20 @@ pid_t child_make(int i, int listenfd, int addrlen)
 	child_main(i, listenfd, addrlen);
 }
 
-void child_main(int i, int listenfd, addrlen)
-{
-	int connfd;
-	socklen_t client;
-	struct sockaddr* cliaddr;
-
-	cliaddr = Malloc(addrlen);
-	printf("%d : child %ld starting\n", i, (long)getpid());
-	for (;;)
-	{
-		clilen = addrlen;
-		connfd = Accept(listenfd, cliaddr, &clilen);
-		printf("%d : %ld : Accept one client \n", i, (long)getpid());
-		str_echo(connfd);
-		Close(connfd);
-	}
-}
-
 void str_echo(int sockfd)
 {
 	ssize_t n;
 	char buf[MAXLINE];
 
 again:
-	while((n = read(sockfd, buf, MAXLINE)) > 0)
-		write(sockfd, buf, n);
+	printf("wait client send data...\n");
+	/* while((n = Readn(sockfd, buf, MAXLINE)) > 0) */
+	if ((n = Readn(sockfd, buf, MAXLINE)) > 0)
+	{
+		printf("send client data back ...\n");
+		printf("%s\n", buf);
+		Write(sockfd, buf, n);
+	}
 
 	if (n < 0 && errno == EINTR)
 		goto again;

@@ -102,6 +102,15 @@ int Listen(int listenfd, int backlog)
 	return n;
 }
 
+int Accept(int listenfd, struct sockaddr* cliaddr, socklen_t *addrlen)
+{
+	int n;
+	if ((n = accept(listenfd, cliaddr, addrlen)) < 0)
+		err_sys("socket err: accept");
+
+	return n;
+}
+
 void* Malloc(size_t nsize)
 {
 	void * ptr;
@@ -111,7 +120,7 @@ void* Malloc(size_t nsize)
 	return ptr;
 }
 
-void* Calloc(size_t num, size_t nsize);
+void* Calloc(size_t num, size_t nsize)
 {
 	void *ptr;
 	if((ptr = calloc(num, nsize)) == NULL)
@@ -165,22 +174,5 @@ void sig_chld(int signo)
 
 void sig_int(int signo)
 {
-	exit(0);
-}
-
-void sig_int_killchildren(int signo)
-{
-	int i;
-	
-	//kill all children
-	for (i = 0; i < nchildren; i++)
-		kill(pids[i], SIGTERM);		// 发送关闭信号
-
-	while (wait(NULL) > 0)	// wait all children close
-		;
-
-	if (errno != ECHILD)
-		err_sys("wait error");
-
 	exit(0);
 }

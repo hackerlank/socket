@@ -75,22 +75,24 @@ int main(int argc, char **argv)
 	nchildren = atoi(argv[3]);
 	nloops = atoi(argv[4]);
 	nbytes = atoi(argv[5]);
-	snprintf(request, sizeof(request), "%d\n", nbytes);
+	memset(request, 0, MAXLINE);
+	snprintf(request, sizeof(request), "%d", nbytes);
 
 	Signal(SIGCHLD, sig_chld);
 	Signal(SIGINT, sig_int);
 	for (i = 0; i < nchildren; i++)
 	{
-		printf("fork one");
+		printf("fork one\n");
 		// 发起子进程
 		if ((pid = Fork()) == 0) {
 			for (j = 0; j < nloops; j++) {
 				// 发起链接，当有套接字链接成功，则返回成功的套接字
-				printf("-------------> Send One TCP Connect");
+				printf("-------------> One TCP Connect\n");
 				fd = Tcp_connect(argv[1], argv[2]);
 				Write(fd, request, strlen(request));
+				printf("-------------> Send TCP Data\n");
 				if((n = Readn(fd, reply, nbytes)) != nbytes)	// 假设服务器是个回射服务器
-					err_quit("server returned %d bytes", n);
+					err_quit("err_quit : server returned %d bytes, nedd %d nbytes", n, nbytes);
 
 				Close(fd);
 			}
@@ -99,11 +101,11 @@ int main(int argc, char **argv)
 		}
 	}
 
-	/* while(wait(NULL) > 0) */
-	/* 	; */
+	while(wait(NULL) > 0)
+		;
 
-	/* if (errno != ECHILD) */
-	/* 	err_sys("wait error"); */
+	if (errno != ECHILD)
+		err_sys("wait error");
 
 	exit(1);
 }
