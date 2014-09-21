@@ -58,6 +58,7 @@ ssize_t readn(int sockfd, void* vptr, size_t n)
 	char* ptr;
 
 	nleft = n;
+	ptr = (char*)vptr;
 	while (nleft > 0)
 	{
 		if ((nreadn = read(sockfd, ptr, nleft)) < 0) {

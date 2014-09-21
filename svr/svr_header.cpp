@@ -77,6 +77,7 @@ void str_echo(int sockfd)
 {
 	ssize_t n;
 	char buf[MAXLINE];
+	memset(buf, 0, MAXLINE);
 
 again:
 	printf("wait client send data...\n");
@@ -84,7 +85,7 @@ again:
 	if ((n = Readn(sockfd, buf, MAXLINE)) > 0)
 	{
 		printf("send client data back ...\n");
-		printf("%s\n", buf);
+		printf("client date num is %ld and data is %s\n", n, buf);
 		Write(sockfd, buf, n);
 	}
 
