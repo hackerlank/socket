@@ -1,22 +1,3 @@
-#include "../base/unp.h"
-
-using namespace std;
-
-void str_echo(int sockfd)
-{
-	ssize_t n;
-	char buf[MAXLINE];
-
-again:
-	while((n = read(sockfd, buf, MAXLINE)) > 0)
-		write(sockfd, buf, n);
-
-	if (n < 0 && errno == EINTR)
-		goto again;
-	else if (n < 0)
-		err_sys("str_echo:read error");
-}
-
 // 此处的 host 也可以是 ipaddress，如果为 null 则是本机 127.0.0.1，szServName 也可以是 port
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 {
@@ -60,41 +41,46 @@ int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 	return (listenfd);
 }
 
-int main(int argc, char **argv)
+pid_t child_make(int i, int listenfd, int addrlen)
 {
-	int listenfd, connfd;
-	pid_t childpid;
-	void sig_chld(int), sig_int(int), web_child(int);
-	socklen_t clilen, addrlen;
-	struct sockaddr *cliaddr;
+	pid_t pid;
+	void child_main(int, int, int);
 
-	if (argc == 2)
-		listenfd = Tcp_listen(NULL, argv[1], &addrlen);
-	else if (argc == 3)
-		listenfd = Tcp_listen(argv[1], argv[2], &addrlen);
-	else
-		err_quit("usage: svr2 [<host>] <port#>");
+	if ((pid = Fork()) > 0)
+		return (pid);
 
-	cliaddr = (struct sockaddr*)Malloc(addrlen);
+	child_main(i, listenfd, addrlen);
+}
 
-	Signal(SIGCHLD, sig_chld);
-	Signal(SIGINT, sig_int);
-	for(; ; ){
+void child_main(int i, int listenfd, addrlen)
+{
+	int connfd;
+	socklen_t client;
+	struct sockaddr* cliaddr;
+
+	cliaddr = Malloc(addrlen);
+	printf("%d : child %ld starting\n", i, (long)getpid());
+	for (;;)
+	{
 		clilen = addrlen;
-		if((connfd = accept(listenfd, cliaddr, &clilen)) < 0) {
-			if (errno == EINTR)
-				continue;
-			else
-				err_sys("accept err");
-		}
-
-		printf("-------> Get Client: Accept");
-		if ((childpid = Fork()) == 0) { /*child process*/
-			Close(listenfd);
-			printf("-------> Get Client: echo");
-			str_echo(connfd);
-			exit(0);
-		}
+		connfd = Accept(listenfd, cliaddr, &clilen);
+		printf("%d : %ld : Accept one client \n", i, (long)getpid());
+		str_echo(connfd);
 		Close(connfd);
 	}
+}
+
+void str_echo(int sockfd)
+{
+	ssize_t n;
+	char buf[MAXLINE];
+
+again:
+	while((n = read(sockfd, buf, MAXLINE)) > 0)
+		write(sockfd, buf, n);
+
+	if (n < 0 && errno == EINTR)
+		goto again;
+	else if (n < 0)
+		err_sys("str_echo:read error");
 }

@@ -102,11 +102,20 @@ int Listen(int listenfd, int backlog)
 	return n;
 }
 
-void* Malloc(int nsize)
+void* Malloc(size_t nsize)
 {
 	void * ptr;
 	if ((ptr = malloc(nsize)) == NULL)
 		err_sys("socket err: Malloc");
+
+	return ptr;
+}
+
+void* Calloc(size_t num, size_t nsize);
+{
+	void *ptr;
+	if((ptr = calloc(num, nsize)) == NULL)
+		err_sys("socket err: Calloc");
 
 	return ptr;
 }
@@ -159,3 +168,19 @@ void sig_int(int signo)
 	exit(0);
 }
 
+void sig_int_killchildren(int signo)
+{
+	int i;
+	
+	//kill all children
+	for (i = 0; i < nchildren; i++)
+		kill(pids[i], SIGTERM);		// 发送关闭信号
+
+	while (wait(NULL) > 0)	// wait all children close
+		;
+
+	if (errno != ECHILD)
+		err_sys("wait error");
+
+	exit(0);
+}

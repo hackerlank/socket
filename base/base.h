@@ -33,7 +33,8 @@ int Setsockopt(int listenfd, int level, int optname, const void* optval, socklen
 
 int Listen(int listenfd, int backlog);
 	
-void* Malloc(int nsize);
+void* Malloc(size_t nsize);
+void* Calloc(size_t num, size_t nsize);
 
 typedef void Sigfunc(int);
 void sig_chld(int signo);
