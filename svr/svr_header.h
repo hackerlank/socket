@@ -1,4 +1,6 @@
 #include "../base/unp.h"
+/* #include <sys/flock.h> */
+#include <fcntl.h>
 
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp);
 

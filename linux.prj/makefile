@@ -5,7 +5,7 @@ APP_DIR = ./app
 
 CFLAGS = -g
 
-all: client svr1 svr2 svr3
+all: client svr1 svr2 svr3 svr4
 .PHONY:all
 
 # client.app

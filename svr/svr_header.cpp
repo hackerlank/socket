@@ -62,7 +62,7 @@ void child_main(int i, int listenfd, int addrlen)
 	}
 }
 
-void child_main_for_file_lock(int i, int listenfd, int addrlen);
+void child_main_for_file_lock(int i, int listenfd, int addrlen)
 {
 	int connfd;
 	socklen_t clilen;
@@ -137,10 +137,10 @@ void file_lock_init(char* pathname)
 {
 	char lockfile[1024];
 
-	strncpy(lock_file, pathname, sizeof(lockfile));
-	lock_fd = Mkstemp(lock_file);
+	strncpy(lockfile, pathname, sizeof(lockfile));
+	lock_fd = Mkstemp(lockfile);
 
-	unlink(lock_file);
+	unlink(lockfile);
 
 	lock_it.l_type = F_WRLCK;
 	lock_it.l_whence = SEEK_SET;

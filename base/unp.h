@@ -13,7 +13,6 @@
 #include <signal.h>
 #include "base.h"
 
-
 #ifndef HAVE_BZERO
 #define bzero(ptr, n) memset(ptr, 0, n)
 #endif
