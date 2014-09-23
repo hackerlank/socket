@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 	nloops = atoi(argv[4]);
 	nbytes = atoi(argv[5]);
 	memset(request, 0, MAXLINE);
-	snprintf(request, sizeof(request), "%d", nbytes);
+	snprintf(request, sizeof(request), "%d\n", nbytes);
 
 	Signal(SIGCHLD, sig_chld);
 	Signal(SIGINT, sig_int);

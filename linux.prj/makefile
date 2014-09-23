@@ -36,6 +36,13 @@ svr3: svr3.o base error svr_header
 svr3.o: $(SRC_DIR)/svr/svr3.cpp
 	cc $(CFLAGS) -c $(SRC_DIR)/svr/svr3.cpp -o $(OBJ_DIR)/svr3.o
 
+#svr4 服务器预先派生一组进程，在 accept 前加上一个文件锁：因为有些系统在实现 accept 的时候……不清楚，和它非原子操作，以及流的实现有关系
+svr4: svr4.o base error svr_header
+	cc $(CFLAGS) -o $(APP_DIR)/svr4.app $(OBJ_DIR)/svr4.o $(OBJ_DIR)/base.o $(OBJ_DIR)/error.o $(OBJ_DIR)/svr_header.o
+
+svr4.o: $(SRC_DIR)/svr/svr4.cpp
+	cc $(CFLAGS) -c $(SRC_DIR)/svr/svr4.cpp -o $(OBJ_DIR)/svr4.o
+
 svr_header: $(SRC_DIR)/svr/svr_header.cpp
 	cc $(CFLAGS) -c $(SRC_DIR)/svr/svr_header.cpp -o $(OBJ_DIR)/svr_header.o
 

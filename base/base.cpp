@@ -177,3 +177,12 @@ void sig_int(int signo)
 {
 	exit(0);
 }
+
+int Mkstemp(char* filename)
+{
+	int fd = -1;
+	if ((fd = mkstemp(filename)) == -1)
+		err_sys("socket error: mkstemp");
+
+	return fd;
+}

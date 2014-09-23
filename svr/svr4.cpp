@@ -18,6 +18,7 @@ int main(int argc, char** argv)
 	nchildren = atoi(argv[argc - 1]);
 	pids = (pid_t *)Calloc(nchildren, sizeof(pid_t));
 
+	file_lock_init("/tmp/lock.xx");
 	for (i = 0; i < nchildren; i++)
 		pids[i] = child_make(i, listenfd, addrlen);
 

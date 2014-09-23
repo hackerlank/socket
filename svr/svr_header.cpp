@@ -62,6 +62,27 @@ void child_main(int i, int listenfd, int addrlen)
 	}
 }
 
+void child_main_for_file_lock(int i, int listenfd, int addrlen);
+{
+	int connfd;
+	socklen_t clilen;
+	struct sockaddr* cliaddr;
+
+	cliaddr = (sockaddr*)Malloc(addrlen);
+	printf("%d : child %ld starting\n", i, (long)getpid());
+	for (;;)
+	{
+		clilen = addrlen;
+		file_lock_wait();
+		connfd = Accept(listenfd, cliaddr, &clilen);
+		file_lock_release();
+		printf("%d : %ld : Accept one client \n", i, (long)getpid());
+		str_echo(connfd);
+		Close(connfd);
+		printf("%d : %ld : Close one client \n", i, (long)getpid());
+	}
+}
+
 pid_t child_make(int i, int listenfd, int addrlen)
 {
 	pid_t pid;
@@ -93,4 +114,58 @@ again:
 		goto again;
 	else if (n < 0)
 		err_sys("str_echo:read error");
+}
+
+void sig_int_killchildren(int signo)
+{
+	int i;
+	
+	//kill all children
+	for (i = 0; i < nchildren; i++)
+		kill(pids[i], SIGTERM);		// 发送关闭信号
+
+	while (wait(NULL) > 0)	// wait all children close
+		;
+
+	if (errno != ECHILD)
+		err_sys("wait error");
+
+	exit(0);
+} 
+
+void file_lock_init(char* pathname)
+{
+	char lockfile[1024];
+
+	strncpy(lock_file, pathname, sizeof(lockfile));
+	lock_fd = Mkstemp(lock_file);
+
+	unlink(lock_file);
+
+	lock_it.l_type = F_WRLCK;
+	lock_it.l_whence = SEEK_SET;
+	lock_it.l_start = 0;
+	lock_it.l_len = 0;
+
+	unlock_it.l_type = F_WRLCK;
+	unlock_it.l_whence = SEEK_SET;
+	unlock_it.l_start = 0;
+	unlock_it.l_len = 0;
+}
+
+void file_lock_wait()
+{
+	int rc;
+	while ((rc = fcntl(lock_fd, F_SETLKW, &lock_it)) < 0) {
+		if (errno == EINTR)
+			continue;
+		else
+			err_sys("fcntl error for my_lock_wait");
+	}
+}
+
+void file_lock_release()
+{
+	if (fcntl(lock_fd, F_SETLKW, &unlock_it) < 0)
+		err_sys("fcntl error for my_lock_release");
 }

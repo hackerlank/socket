@@ -33,6 +33,7 @@ int Readn(int sockfd, void* vptr, size_t n);
 
 int Accept(int listenfd, struct sockaddr* cliaddr, socklen_t *addrlen);
 
+int Mkstemp(char* filename);
 	
 int Fork();
 
