@@ -30,6 +30,7 @@ int Setsockopt(int listenfd, int level, int optname, const void* optval, socklen
 int Listen(int listenfd, int backlog);
 
 int Readn(int sockfd, void* vptr, size_t n);
+int Readline(int sockfd, void* vptr, size_t n);
 
 int Accept(int listenfd, struct sockaddr* cliaddr, socklen_t *addrlen);
 

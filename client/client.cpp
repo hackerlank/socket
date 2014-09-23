@@ -91,8 +91,8 @@ int main(int argc, char **argv)
 				fd = Tcp_connect(argv[1], argv[2]);
 				int nwrite = Write(fd, request, strlen(request));
 				printf("-------------> Send TCP Data %d : %s \n", nwrite, request);
-				if((n = Readn(fd, reply, nbytes)) != nbytes)	// 假设服务器是个回射服务器
-					err_quit("err_quit : server returned %d bytes, nedd %d nbytes", n, nbytes);
+				if((n = Readn(fd, reply, nbytes)) != nwrite)	// 假设服务器是个回射服务器
+					err_quit("err_quit : server returned %d bytes, nedd %d nbytes", n, nwrite);
 
 				Close(fd);
 			}

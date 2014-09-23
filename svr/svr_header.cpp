@@ -102,8 +102,8 @@ void str_echo(int sockfd)
 
 again:
 	printf("wait client send data...\n");
-	/* while((n = Readn(sockfd, buf, MAXLINE)) > 0) */
-	if ((n = Readn(sockfd, buf, MAXLINE)) > 0)
+	/* if ((n = Readn(sockfd, buf, MAXLINE)) > 0) */
+	if ((n = Readline(sockfd, buf, MAXLINE)) > 0)
 	{
 		printf("send client data back ...\n");
 		printf("client date num is %ld and data is %s\n", n, buf);

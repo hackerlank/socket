@@ -85,6 +85,48 @@ int Readn(int sockfd, void* vptr, size_t n)
 	return (nReadn);
 }
 
+ssize_t readline(int sockfd, void * vptr, size_t maxlen)
+{
+	printf("---> %d readline: %d\n", maxlen, errno);
+	ssize_t n, rc;
+	char c, *ptr;
+	ptr = (char*)vptr;
+
+	for (n = 1; n < maxlen; n++)
+	{
+		again:
+		rc = read(sockfd, &c, 1);
+		printf("%d read : %c\n", rc, c);
+		if (rc == 1) {
+			*ptr++ = c;
+			if (c == '\n')
+				break;
+		} else if(rc == 0) {
+			*ptr = 0;
+			return (n - 1);
+		} else {
+			if (errno == EINTR)
+				goto again;
+
+			printf("---> errno : %d", errno);
+			return (-1);
+		}
+	}
+
+	printf("end of readline %d \n", int(n));
+	*ptr = 0;
+	return (n);
+}
+
+int Readline(int sockfd, void* vptr, size_t n)
+{
+	ssize_t nReadn;
+	if ((nReadn = readline(sockfd, vptr, n)) < 0)
+		err_sys("socket err: readline");
+
+	return (nReadn);
+}
+
 int Setsockopt(int listenfd, int level, int optname, const void* optval, socklen_t optlen)
 {
 	int n;
