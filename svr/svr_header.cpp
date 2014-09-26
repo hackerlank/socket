@@ -1,4 +1,5 @@
 #include "svr_header.h"
+#include <sys/mman.h>
 
 // 此处的 host 也可以是 ipaddress，如果为 null 则是本机 127.0.0.1，szServName 也可以是 port
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
@@ -168,4 +169,12 @@ void file_lock_release()
 {
 	if (fcntl(lock_fd, F_SETLKW, &unlock_it) < 0)
 		err_sys("fcntl error for my_lock_release");
+}
+
+void pthread_lock_init()
+{
+	int fd;
+	pthread_mutexattr_t mattr;
+
+	fd = Open("/dev/socket_pthread_lock", O_RDWR, 0);
 }

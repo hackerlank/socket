@@ -5,7 +5,7 @@ APP_DIR = ./app
 
 CFLAGS = -g
 
-all: client svr1 svr2 svr3 svr4
+all: client svr1 svr2 svr3 svr4 svr5
 .PHONY:all
 
 # client.app
@@ -42,6 +42,13 @@ svr4: svr4.o base error svr_header
 
 svr4.o: $(SRC_DIR)/svr/svr4.cpp
 	cc $(CFLAGS) -c $(SRC_DIR)/svr/svr4.cpp -o $(OBJ_DIR)/svr4.o
+
+#svr5 服务器预先派生一组进程，在 accept 前加上一个线程锁，这样同一进程，或者多进程之间，都能够被保护到
+svr5: svr5.o base error svr_header
+	cc $(CFLAGS) -o $(APP_DIR)/svr5.app $(OBJ_DIR)/svr5.o $(OBJ_DIR)/base.o $(OBJ_DIR)/error.o $(OBJ_DIR)/svr_header.o
+
+svr5.o: $(SRC_DIR)/svr/svr5.cpp
+	cc $(CFLAGS) -o $(OBJ_DIR)/svr5.o -c $(SRC_DIR)/svr/svr5.cpp
 
 svr_header: $(SRC_DIR)/svr/svr_header.cpp
 	cc $(CFLAGS) -c $(SRC_DIR)/svr/svr_header.cpp -o $(OBJ_DIR)/svr_header.o
