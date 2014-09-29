@@ -84,6 +84,27 @@ void child_main_for_file_lock(int i, int listenfd, int addrlen)
 	}
 }
 
+void child_main_for_pthread_lock(int i, int listenfd, int addrlen)	// 如何共有这一段代码
+{
+	int connfd;
+	socklen_t clilen;
+	struct sockaddr* cliaddr;
+
+	cliaddr = (sockaddr*)Malloc(addrlen);
+	printf("%d : child %ld starting\n", i, (long)getpid());
+	for (;;)
+	{
+		clilen = addrlen;
+		pthread_lock_wait();
+		connfd = Accept(listenfd, cliaddr, &clilen);
+		pthread_lock_release();
+		printf("%d : %ld : Accept one client \n", i, (long)getpid());
+		str_echo(connfd);
+		Close(connfd);
+		printf("%d : %ld : Close one client \n", i, (long)getpid());
+	}
+}
+
 pid_t child_make(int i, int listenfd, int addrlen)
 {
 	pid_t pid;
@@ -93,6 +114,28 @@ pid_t child_make(int i, int listenfd, int addrlen)
 		return (pid);
 
 	child_main(i, listenfd, addrlen);
+}
+
+pid_t child_make_for_file_lock(i, listenfd, addrlen)
+{
+	pid_t pid;
+	void child_main_for_file_lock(int, int, int);
+
+	if((pid = Fork()) > 0)
+		return (pid);
+
+	child_main_for_file_lock(i, listenfd, addrlen);
+}
+
+pid_t child_make_for_pthread_lock(i, listenfd, addrlen)
+{
+	pid_t pid;
+	void child_main_for_pthread_lock(int, int, int);
+
+	if((pid = Fork()) > 0)
+		return (pid);
+
+	child_main_for_pthread_lock(i, listenfd, addrlen);
 }
 
 void str_echo(int sockfd)
@@ -177,4 +220,20 @@ void pthread_lock_init()
 	pthread_mutexattr_t mattr;
 
 	fd = Open("/dev/socket_pthread_lock", O_RDWR, 0);
+	mptr = Mmap(0, sizeof(pthread_mutex_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	Close(fd);
+
+	Pthread_mutexattr_init(&mattr);
+	Pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED);
+	Pthread_mutex_init(mptr, &mattr);
+}
+
+void pthread_lock_wait()
+{
+	Pthread_mutex_lock(mptr);
+}
+
+void pthread_lock_release()
+{
+	Pthread_mutex_unlock(mptr);
 }

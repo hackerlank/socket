@@ -18,12 +18,13 @@ int main(int argc, char** argv)
 	nchildren = atoi(argv[argc - 1]);
 	pids = (pid_t *)Calloc(nchildren, sizeof(pid_t));
 
-	file_lock_init("/tmp/lock.xx");
+	pthread_lock_init("/tmp/lock.xx");
 	for (i = 0; i < nchildren; i++)
-		pids[i] = child_make_for_file_lock(i, listenfd, addrlen);
+		pids[i] = child_main_for_pthread_lock(i, listenfd, addrlen);
 
 	Signal(SIGINT, sig_int_killchildren);
 
 	for(;;)
 		pause();
 }
+

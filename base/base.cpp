@@ -1,4 +1,5 @@
 #include "unp.h"
+#include <sys/mman.h>
 
 int Close(int sockfd)
 {
@@ -227,4 +228,63 @@ int Mkstemp(char* filename)
 		err_sys("socket error: mkstemp");
 
 	return fd;
+}
+
+int Open(const char*pathname, int oflag, mode_t mode)
+{
+	int fd;
+
+	if((fd = open(pathname, oflag, mode)) == -1)
+		err_sys("open error for %s", pathname);
+
+	return (fd);
+}
+
+void* Mmap(void* addr, size_t len, int prot, int flags, int fd, off_t offset)
+{
+	void *ptr;
+	if ((ptr = mmap(addr, len, prot, flags, fd, offset)) == ((void*)-1))
+		err_sys("mmap error");
+
+	return ptr;
+}
+
+void Pthread_mutexattr_init(pthread_mutexattr_t *attr)
+{
+	if ((n = pthread_mutexattr_init(attr)) != 0)
+		err_sys("pthread_mutexattr_inti error");
+
+	return;
+}
+
+void Pthread_mutexattr_setpshared(pthread_mutexattr_t *attr, int flag)
+{
+	if ((n = pthread_metxattr_setpshared(attr, flag)) != 0)
+		err_sys("pthread_metxattr_setpshared error");
+
+	return;
+}
+
+void Pthread_mutex_init(pthread_mutex_t *mptr, pthread_mutexattr_t *attr)
+{
+	if ((n = pthread_mutex_init(mptr, attr)) != 0)
+		err_sys("pthread_metxattr_init error");
+
+	return;
+}
+
+void Pthread_mutex_lock(pthread_mutex_t *mptr)
+{
+	if ((n = pthread_mutex_lock(mptr)) != 0)
+		err_sys("pthread_mutex_lock error");
+
+	return;
+}
+
+void Pthread_mutex_unlock(pthread_mutex_t *mptr)
+{
+	if ((n = pthread_mutex_unlock(mptr)) != 0)
+		err_sys("pthread_mutex_unlock error");
+
+	return;
 }
