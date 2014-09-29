@@ -50,14 +50,15 @@ void sig_int(int signo);
 /* void sig_int_killchildren(int signo) */
 
 Sigfunc* signal(int signo, Sigfunc *func);
+Sigfunc* Signal(int signo, Sigfunc *func);
 
 int Mkstemp(char* filename);
 void* Mmap(void* addr, size_t len, int prot, int flags, int fd, off_t offset);
 void Pthread_mutexattr_init(pthread_mutexattr_t *attr);
 void Pthread_mutexattr_setpshared(pthread_mutexattr_t *attr, int flag);
 void Pthread_mutex_init(pthread_mutex_t *mptr, pthread_mutexattr_t *attr);
-void Pthread_mutex_lock(pthread_mutex_t *mptr)
-void Pthread_mutex_unlock(pthread_mutex_t *mptr)
+void Pthread_mutex_lock(pthread_mutex_t *mptr);
+void Pthread_mutex_unlock(pthread_mutex_t *mptr);
 // Linux 相关的 wrap 函数
 // 
 //

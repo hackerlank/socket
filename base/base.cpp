@@ -1,5 +1,7 @@
 #include "unp.h"
 #include <sys/mman.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 int Close(int sockfd)
 {
@@ -251,6 +253,7 @@ void* Mmap(void* addr, size_t len, int prot, int flags, int fd, off_t offset)
 
 void Pthread_mutexattr_init(pthread_mutexattr_t *attr)
 {
+	int n;
 	if ((n = pthread_mutexattr_init(attr)) != 0)
 		err_sys("pthread_mutexattr_inti error");
 
@@ -259,7 +262,8 @@ void Pthread_mutexattr_init(pthread_mutexattr_t *attr)
 
 void Pthread_mutexattr_setpshared(pthread_mutexattr_t *attr, int flag)
 {
-	if ((n = pthread_metxattr_setpshared(attr, flag)) != 0)
+	int n;
+	if ((n = pthread_mutexattr_setpshared(attr, flag)) != 0)
 		err_sys("pthread_metxattr_setpshared error");
 
 	return;
@@ -267,6 +271,7 @@ void Pthread_mutexattr_setpshared(pthread_mutexattr_t *attr, int flag)
 
 void Pthread_mutex_init(pthread_mutex_t *mptr, pthread_mutexattr_t *attr)
 {
+	int n;
 	if ((n = pthread_mutex_init(mptr, attr)) != 0)
 		err_sys("pthread_metxattr_init error");
 
@@ -275,6 +280,7 @@ void Pthread_mutex_init(pthread_mutex_t *mptr, pthread_mutexattr_t *attr)
 
 void Pthread_mutex_lock(pthread_mutex_t *mptr)
 {
+	int n;
 	if ((n = pthread_mutex_lock(mptr)) != 0)
 		err_sys("pthread_mutex_lock error");
 
@@ -283,6 +289,7 @@ void Pthread_mutex_lock(pthread_mutex_t *mptr)
 
 void Pthread_mutex_unlock(pthread_mutex_t *mptr)
 {
+	int n;
 	if ((n = pthread_mutex_unlock(mptr)) != 0)
 		err_sys("pthread_mutex_unlock error");
 

@@ -116,7 +116,7 @@ pid_t child_make(int i, int listenfd, int addrlen)
 	child_main(i, listenfd, addrlen);
 }
 
-pid_t child_make_for_file_lock(i, listenfd, addrlen)
+pid_t child_make_for_file_lock(int i, int listenfd, int addrlen)
 {
 	pid_t pid;
 	void child_main_for_file_lock(int, int, int);
@@ -127,7 +127,7 @@ pid_t child_make_for_file_lock(i, listenfd, addrlen)
 	child_main_for_file_lock(i, listenfd, addrlen);
 }
 
-pid_t child_make_for_pthread_lock(i, listenfd, addrlen)
+pid_t child_make_for_pthread_lock(int i, int listenfd, int addrlen)
 {
 	pid_t pid;
 	void child_main_for_pthread_lock(int, int, int);
@@ -214,13 +214,13 @@ void file_lock_release()
 		err_sys("fcntl error for my_lock_release");
 }
 
-void pthread_lock_init()
+void pthread_lock_init(char* szFileName)
 {
 	int fd;
 	pthread_mutexattr_t mattr;
 
-	fd = Open("/dev/socket_pthread_lock", O_RDWR, 0);
-	mptr = Mmap(0, sizeof(pthread_mutex_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	fd = Open(szFileName, O_RDWR, 0);
+	mptr = (pthread_mutex_t *)Mmap(0, sizeof(pthread_mutex_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	Close(fd);
 
 	Pthread_mutexattr_init(&mattr);

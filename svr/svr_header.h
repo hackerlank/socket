@@ -24,7 +24,7 @@ void file_lock_init(char* pathname);
 void file_lock_wait();
 void file_lock_release();
 void child_main_for_file_lock(int i, int listenfd, int addrlen);
-pid_t child_make_for_file_lock(i, listenfd, addrlen);
+pid_t child_make_for_file_lock(int i, int listenfd, int addrlen);
 
 // 这里是关于 accept 开启线程后的线程加锁
 static pthread_mutex_t *mptr;
@@ -33,4 +33,4 @@ void pthread_lock_init(char* pathname);	// 记得线程是放置在一个地方�
 void pthread_lock_wait();
 void pthread_lock_release();
 void child_main_for_pthread_lock(int i, int listenfd, int addrlen);	// 如何共有这一段代码
-pid_t child_make_for_pthread_lock(i, listenfd, addrlen);
+pid_t child_make_for_pthread_lock(int i, int listenfd, int addrlen);
