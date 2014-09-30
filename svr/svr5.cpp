@@ -18,7 +18,9 @@ int main(int argc, char** argv)
 	nchildren = atoi(argv[argc - 1]);
 	pids = (pid_t *)Calloc(nchildren, sizeof(pid_t));
 
-	pthread_lock_init("/tmp/lock.xx");
+	/* pthread_lock_init("/dev/zero"); */
+	/* pthread_lock_init("/dev/null"); */
+	pthread_lock_init("test");
 	for (i = 0; i < nchildren; i++)
 		pids[i] = child_make_for_pthread_lock(i, listenfd, addrlen);
 

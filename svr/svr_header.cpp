@@ -219,8 +219,9 @@ void pthread_lock_init(char* szFileName)
 	int fd;
 	pthread_mutexattr_t mattr;
 
-	fd = Open(szFileName, O_RDWR, 0);
+	fd = Open(szFileName, O_RDWR | O_CREAT, 0);
 	mptr = (pthread_mutex_t *)Mmap(0, sizeof(pthread_mutex_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	memset(mptr, 0, sizeof(pthread_mutex_t));
 	Close(fd);
 
 	Pthread_mutexattr_init(&mattr);
