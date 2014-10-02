@@ -295,3 +295,16 @@ void Pthread_mutex_unlock(pthread_mutex_t *mptr)
 
 	return;
 }
+
+void Socketpair(int family, int type, int protocal, int *fd)
+{
+	int n;
+	if ((n = socketpair(family, type, protocal, fd)) < 0)
+		err_sys("socketpair err");
+}
+
+void Dup2(int fd1, int fd2)
+{
+	if (dup2(fd1, fd2) == -1)
+		err_sys("Dup2 Oerror");
+}

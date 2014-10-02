@@ -238,3 +238,50 @@ void pthread_lock_release()
 {
 	Pthread_mutex_unlock(mptr);
 }
+
+int child_make_for_pipe(int pid_t, int listenfd, int addrlen)
+{
+	int sockfd[2];
+	pid_t pid;
+	void child_main_for pipe(int, int, int);
+
+	Socketpair(AF_LOCAL, SOKC_STREAM, 0, sockfd);
+
+	if((pid = Fork()) > 0)
+	{
+		// parent
+		Close(sockfd[1]);	// 父进程使用 sockfd[0]
+		cptr[i].child_pid = pid;
+		cptr[i].child_pipefd = sockfd[0];
+		cptr[i].child_status = 0;
+		return (pid);
+	}
+
+	Dup2(sockfd[1], STDERR_FILENO);	// 子进程使用 socket[1]，并且将其绑定在标准错误输出上（为什么？）
+	Close(sockfd[0]);
+	Close(sockfd[1]);
+	Close(listenfd);
+	child_main_for_pipe(i, listenfd, addrlen);
+}
+
+void child_main_for_pipe(int i, int listenfd, int addrlen)
+{
+	char c;
+	int connfd;
+	ssize_t n;
+	void str_echo(int);
+
+	printf("child %d starting\n", (long) getpid());
+	for(; ;)
+	{
+		if (n = Read_fd(STDERR_FILENO, &c, 1, &connfd))
+			err_quit("read_fd returned 0");
+
+		if (connfd < 0)
+			err_quit("no descriptor from read_fd");
+
+		str_echo(connfd);
+		Close(connfd);
+		Write(STDERR_FILENO, "", 1);	// tell father , child is finish the net request
+	}
+}

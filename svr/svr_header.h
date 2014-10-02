@@ -34,3 +34,16 @@ void pthread_lock_wait();
 void pthread_lock_release();
 void child_main_for_pthread_lock(int i, int listenfd, int addrlen);	// 如何共有这一段代码
 pid_t child_make_for_pthread_lock(int i, int listenfd, int addrlen);
+
+// 预先派生自进程，通过管道传递
+struct Child{
+	pid_t	child_pid;
+	int		child_pipefd;
+	int		child_status;
+	long 	child_coount;
+}
+
+Child *cptr;
+
+pid_t child_make_for_pipe(int i, int listenfd, int addrlen);
+void child_main_for_pipe(int i, int listenfd, int addrlen);
