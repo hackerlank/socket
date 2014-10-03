@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	else if (argc == 4)
 		listenfd = Tcp_listen(argv[1], argv[2], &addrlen);
 	else
-		err_quit("usage: serv05 [ <host> ] <port#> <#children>");
+		err_quit("usage: serv06 [ <host> ] <port#> <#children>");
 
 	FD_ZERO(&masterset);
 	FD_SET(listenfd, &masterset);
