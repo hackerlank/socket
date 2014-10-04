@@ -11,6 +11,7 @@
 //#include <sys/filio.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/select.h>
 #include "base.h"
 
 #ifndef HAVE_BZERO

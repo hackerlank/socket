@@ -1,12 +1,12 @@
-#include	"unp.h"
+#include "svr_header.h"
+#include "../base/unp.h"
 
-static int		nchildren;
+extern int		nchildren;
+extern Child *cptr;
 
 int main(int argc, char **argv)
 {
 	int			listenfd, i, navail, maxfd, nsel, connfd, rc;
-	void		sig_int(int);
-	pid_t		child_make(int, int, int);
 	ssize_t		n;
 	fd_set		rset, masterset;
 	socklen_t	addrlen, clilen;
@@ -22,20 +22,21 @@ int main(int argc, char **argv)
 	FD_ZERO(&masterset);
 	FD_SET(listenfd, &masterset);
 	maxfd = listenfd;
-	cliaddr = Malloc(addrlen);
+	cliaddr = (struct sockaddr *)Malloc(addrlen);
 
 	nchildren = atoi(argv[argc-1]);
 	navail = nchildren;
-	cptr = Calloc(nchildren, sizeof(Child));
+	cptr = (struct Child*)Calloc(nchildren, sizeof(Child));
+	/* cptr = (struct Child*)Malloc(nchildren * sizeof(Child)); */
 
 	/* 4prefork all the children */
 	for (i = 0; i < nchildren; i++) {
-		child_make(i, listenfd, addrlen);	/* parent returns */
+		child_make_for_pipe(i, listenfd, addrlen);	/* parent returns */
 		FD_SET(cptr[i].child_pipefd, &masterset);
-		maxfd = max(maxfd, cptr[i].child_pipefd);
+		maxfd = std::max(maxfd, cptr[i].child_pipefd);
 	}
 
-	Signal(SIGINT, sig_int);
+	Signal(SIGINT, sig_int_for_pipechildren);
 
 	for ( ; ; ) {
 		rset = masterset;
@@ -58,7 +59,7 @@ int main(int argc, char **argv)
 			cptr[i].child_count++;
 			navail--;
 
-			n = Write_fd(cptr[i].child_pipefd, "", 1, connfd);
+			n = Write_fd(cptr[i].child_pipefd, (void *)"", 1, connfd);
 			Close(connfd);
 			if (--nsel == 0)
 				continue;	/* all done with select() results */
@@ -76,25 +77,4 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-}
-
-void sig_int(int signo)
-{
-	int		i;
-	/* void	pr_cpu_time(void); */
-
-	/* 4terminate all children */
-	for (i = 0; i < nchildren; i++)
-		kill(cptr[i].child_pid, SIGTERM);
-	while (wait(NULL) > 0)		/* wait for all children */
-		;
-	if (errno != ECHILD)
-		err_sys("wait error");
-
-	/* pr_cpu_time(); */
-
-	for (i = 0; i < nchildren; i++)
-		printf("child %d, %ld connections\n", i, cptr[i].child_count);
-
-	exit(0);
 }

@@ -90,7 +90,6 @@ int Readn(int sockfd, void* vptr, size_t n)
 
 ssize_t readline(int sockfd, void * vptr, size_t maxlen)
 {
-	printf("---> %d readline: %d\n", maxlen, errno);
 	ssize_t n, rc;
 	char c, *ptr;
 	ptr = (char*)vptr;
@@ -307,4 +306,135 @@ void Dup2(int fd1, int fd2)
 {
 	if (dup2(fd1, fd2) == -1)
 		err_sys("Dup2 Oerror");
+}
+
+int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
+{
+	int		n;
+
+	if ( (n = select(nfds, readfds, writefds, exceptfds, timeout)) < 0)
+		err_sys("select error");
+	return(n);		/* can return 0 on timeout */
+}
+
+ssize_t write_fd(int fd, void *ptr, size_t nbytes, int sendfd)
+{
+	struct msghdr	msg;
+	struct iovec	iov[1];
+
+#ifdef	HAVE_MSGHDR_MSG_CONTROL
+	union {
+		struct cmsghdr	cm;
+		char				control[CMSG_SPACE(sizeof(int))];
+	} control_un;
+	struct cmsghdr	*cmptr;
+
+	msg.msg_control = control_un.control;
+	msg.msg_controllen = sizeof(control_un.control);
+
+	cmptr = CMSG_FIRSTHDR(&msg);
+	cmptr->cmsg_len = CMSG_LEN(sizeof(int));
+	cmptr->cmsg_level = SOL_SOCKET;
+	cmptr->cmsg_type = SCM_RIGHTS;
+	*((int *) CMSG_DATA(cmptr)) = sendfd;
+#else
+	msg.msg_accrights = (caddr_t) &sendfd;
+	msg.msg_accrightslen = sizeof(int);
+#endif
+
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+
+	iov[0].iov_base = ptr;
+	iov[0].iov_len = nbytes;
+	msg.msg_iov = iov;
+	msg.msg_iovlen = 1;
+
+	return(sendmsg(fd, &msg, 0));
+}
+/* end write_fd */
+
+ssize_t Write_fd(int fd, void *ptr, size_t nbytes, int sendfd)
+{
+	ssize_t		n;
+
+	if ( (n = write_fd(fd, ptr, nbytes, sendfd)) < 0)
+		err_sys("write_fd error");
+
+	return(n);
+}
+
+ssize_t Read(int fd, void *ptr, size_t nbytes)
+{
+	ssize_t		n;
+
+	if ( (n = read(fd, ptr, nbytes)) == -1)
+				err_sys("read error");
+		return(n);
+}
+
+ssize_t read_fd(int fd, void *ptr, size_t nbytes, int *recvfd)
+{
+	struct msghdr	msg;
+	struct iovec	iov[1];
+	ssize_t			n;
+
+#ifdef	HAVE_MSGHDR_MSG_CONTROL
+	union {
+		struct cmsghdr	cm;
+		char				control[CMSG_SPACE(sizeof(int))];
+	} control_un;
+	struct cmsghdr	*cmptr;
+
+	msg.msg_control = control_un.control;
+	msg.msg_controllen = sizeof(control_un.control);
+#else
+	int				newfd;
+
+	msg.msg_accrights = (caddr_t) &newfd;
+	msg.msg_accrightslen = sizeof(int);
+#endif
+
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+
+	iov[0].iov_base = ptr;
+	iov[0].iov_len = nbytes;
+	msg.msg_iov = iov;
+	msg.msg_iovlen = 1;
+
+	if ( (n = recvmsg(fd, &msg, 0)) <= 0)
+		return(n);
+
+#ifdef	HAVE_MSGHDR_MSG_CONTROL
+	if ( (cmptr = CMSG_FIRSTHDR(&msg)) != NULL &&
+			cmptr->cmsg_len == CMSG_LEN(sizeof(int))) {
+		if (cmptr->cmsg_level != SOL_SOCKET)
+			err_quit("control level != SOL_SOCKET");
+		if (cmptr->cmsg_type != SCM_RIGHTS)
+			err_quit("control type != SCM_RIGHTS");
+		*recvfd = *((int *) CMSG_DATA(cmptr));
+	} else
+		*recvfd = -1;		/* descriptor was not passed */
+#else
+	/* *INDENT-OFF* */
+	if (msg.msg_accrightslen == sizeof(int))
+		*recvfd = newfd;
+	else
+		*recvfd = -1;		/* descriptor was not passed */
+	/* *INDENT-ON* */
+#endif
+
+	return(n);
+}
+/* end read_fd */
+
+ssize_t Read_fd(int fd, void *ptr, size_t nbytes, int *recvfd)
+{
+	ssize_t		n;
+
+	if ( (n = read_fd(fd, ptr, nbytes, recvfd)) < 0)
+		err_sys("read_fd error");
+
+	return(n);
 }

@@ -1,6 +1,9 @@
 #include "../base/unp.h"
 #include "svr_header.h"
 
+extern int nchildren;
+extern pid_t *pids;
+
 int main(int argc, char** argv)
 {
 	int listenfd, i;

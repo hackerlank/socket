@@ -1,6 +1,13 @@
 #include "../base/unp.h"
 #include "svr_header.h"
 
+extern int nchildren;
+extern pid_t *pids;
+
+extern struct flock lock_it, unlock_it;
+extern int lock_fd; 
+extern pthread_mutex_t *mptr;
+
 int main(int argc, char** argv)
 {
 	int listenfd, i;

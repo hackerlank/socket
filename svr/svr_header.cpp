@@ -1,6 +1,15 @@
 #include "svr_header.h"
 #include <sys/mman.h>
 
+int nchildren;
+pid_t *pids;
+
+struct flock lock_it, unlock_it;
+int lock_fd = 1;
+pthread_mutex_t *mptr;
+
+Child *cptr;
+
 // 此处的 host 也可以是 ipaddress，如果为 null 则是本机 127.0.0.1，szServName 也可以是 port
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 {
@@ -177,6 +186,27 @@ void sig_int_killchildren(int signo)
 	exit(0);
 } 
 
+void sig_int_for_pipechildren(int signo)
+{
+	int		i;
+	/* void	pr_cpu_time(void); */
+
+	/* 4terminate all children */
+	for (i = 0; i < nchildren; i++)
+		kill(cptr[i].child_pid, SIGTERM);
+	while (wait(NULL) > 0)		/* wait for all children */
+		;
+	if (errno != ECHILD)
+		err_sys("wait error");
+
+	/* pr_cpu_time(); */
+
+	for (i = 0; i < nchildren; i++)
+		printf("child %d, %ld connections\n", i, cptr[i].child_count);
+
+	exit(0);
+}
+
 void file_lock_init(char* pathname)
 {
 	char lockfile[1024];
@@ -239,21 +269,21 @@ void pthread_lock_release()
 	Pthread_mutex_unlock(mptr);
 }
 
-int child_make_for_pipe(int pid_t, int listenfd, int addrlen)
+pid_t child_make_for_pipe(int i, int listenfd, int addrlen)
 {
 	int sockfd[2];
 	pid_t pid;
-	void child_main_for pipe(int, int, int);
+	void child_main_for_pipe(int, int, int);
 
-	Socketpair(AF_LOCAL, SOKC_STREAM, 0, sockfd);
+	Socketpair(AF_LOCAL, SOCK_STREAM, 0, sockfd);
 
 	if((pid = Fork()) > 0)
 	{
 		// parent
 		Close(sockfd[1]);	// 父进程使用 sockfd[0]
-		cptr[i].child_pid = pid;
-		cptr[i].child_pipefd = sockfd[0];
-		cptr[i].child_status = 0;
+		/* cptr[i].child_pid = pid; */
+		/* cptr[i].child_pipefd = sockfd[0]; */
+		/* cptr[i].child_status = 0; */
 		return (pid);
 	}
 
@@ -271,10 +301,10 @@ void child_main_for_pipe(int i, int listenfd, int addrlen)
 	ssize_t n;
 	void str_echo(int);
 
-	printf("child %d starting\n", (long) getpid());
+	printf("child %ld starting\n", (long) getpid());
 	for(; ;)
 	{
-		if (n = Read_fd(STDERR_FILENO, &c, 1, &connfd))
+		if ((n == Read_fd(STDERR_FILENO, &c, 1, &connfd)) < 0)
 			err_quit("read_fd returned 0");
 
 		if (connfd < 0)

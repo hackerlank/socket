@@ -1,3 +1,9 @@
+#ifndef __BASE_H__
+#define __BASE_H__
+
+/* define if struct msghdr contains the msg_control member */
+#define HAVE_MSGHDR_MSG_CONTROL 1
+
 /* 
 包裹函数：这样写是因为，线程函数遇到错误时并不设置标准 Unix 的 errno 变量，而是把 errno 的值作为函数返回值返回给调用者
 那么通常代码就会如下
@@ -38,13 +44,14 @@ void Socketpair(int family, int type, int protocal, int *fd);
 int Fork(); // 生成子进程，父进程的返回值为子进程 ID，子进程的返回值为 0
 
 int Open(const char*pathname, int oflag, mode_t mode);
-int Close(int sockfd);
+int Close(int fd);
 
 // 总的来说， Write 和 Read 是为 Socket 而写的，因为 errno == EINTR 这个错误处理
 // 但放在这里应该也是合适的
-int Write(int sockfd, const void*vptr, size_t n);
-int Readn(int sockfd, void* vptr, size_t n);
-int Readline(int sockfd, void* vptr, size_t n);	// 低效率版本
+int Write(int fd, const void*vptr, size_t n);
+ssize_t Read(int fd, void* vptr, size_t n);
+int Readn(int fd, void* vptr, size_t n);
+int Readline(int fd, void* vptr, size_t n);	// 低效率版本
 
 typedef void Sigfunc(int);
 void sig_chld(int signo);
@@ -63,6 +70,12 @@ void Pthread_mutex_lock(pthread_mutex_t *mptr);
 void Pthread_mutex_unlock(pthread_mutex_t *mptr);
 
 void Dup2(int fd1, int fd2);
+
+int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+ssize_t write_fd(int fd, void *ptr, size_t nbytes, int sendfd);
+ssize_t Write_fd(int fd, void *ptr, size_t nbytes, int sendfd);
+ssize_t read_fd(int fd, void *ptr, size_t nbytes, int *recvfd);
+ssize_t Read_fd(int fd, void *ptr, size_t nbytes, int *recvfd);
 // Linux 相关的 wrap 函数
 // 
 //
@@ -70,3 +83,5 @@ void Dup2(int fd1, int fd2);
 // C++ 内置的 wrap 函数
 void* Malloc(size_t nsize);
 void* Calloc(size_t num, size_t nsize);
+
+#endif
