@@ -470,3 +470,24 @@ void Pthread_detach(pthread_t tid)
 	errno = n;
 	err_sys("pthread_detach error");
 }
+
+void Pthread_cond_signal(pthread_cond_t *cptr)
+{
+	int		n;
+
+	if ( (n = pthread_cond_signal(cptr)) == 0)
+		return;
+	errno = n;
+	err_sys("pthread_cond_signal error");
+}
+
+void Pthread_cond_wait(pthread_cond_t *cptr, pthread_mutex_t *mptr)
+{
+	int		n;
+
+	if ( (n = pthread_cond_wait(cptr, mptr)) == 0)
+		return;
+	errno = n;
+	err_sys("pthread_cond_wait error");
+}
+

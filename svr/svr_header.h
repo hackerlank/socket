@@ -5,6 +5,8 @@
 /* #include <sys/flock.h> */
 #include <fcntl.h>
 
+#define MAXCLI 32
+
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp);
 
 pid_t child_make(int i, int listenfd, int addrlen);
@@ -51,4 +53,6 @@ typedef struct {
 void thread_make(int i);
 void* thread_main(void* arg);
 
+void thread_make_for_cond_wait(int i);
+void* thread_main_for_cond_wait(void* arg);
 #endif

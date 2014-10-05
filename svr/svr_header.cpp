@@ -15,6 +15,9 @@ int listenfd, nthreads;
 socklen_t addrlen;
 pthread_mutex_t m_lock = PTHREAD_MUTEX_INITIALIZER;
 
+int clifd[MAXCLI], iget, iput;
+pthread_cond_t clifd_cond = PTHREAD_COND_INITIALIZER;
+
 // 此处的 host 也可以是 ipaddress，如果为 null 则是本机 127.0.0.1，szServName 也可以是 port
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 {
@@ -342,6 +345,39 @@ void* thread_main(void* arg)
 		Pthread_mutex_lock(&m_lock);
 		connfd = Accept(listenfd, cliaddr, &addrlen);
 		Pthread_mutex_unlock(&m_lock);
+		tptr[i].thread_count++;
+		str_echo(connfd);
+		Close(connfd);
+	}
+}
+
+void thread_make_for_cond_wait(int i)
+{
+	Pthread_create(&tptr[i].thread_tid, NULL, &thread_main_for_cond_wait, (void*)&i);
+	return;
+}
+
+void* thread_main_for_cond_wait(void* arg)
+{
+	int i = *((int *)arg);
+	int	connfd;
+	printf("pthread %d starting\n", i);
+	for (;;)
+	{
+		Pthread_mutex_lock(&m_lock);
+		printf("____child lock one connet\n");
+		while(iget == iput)
+		{
+			printf("____child wait one connet %d, %d\n", &clifd_cond, &m_lock);
+			Pthread_cond_wait(&clifd_cond, &m_lock);
+		}
+
+		printf("____child get one connet\n");
+		connfd = clifd[iget];
+		if(++iget == MAXCLI)
+			iget = 0;
+		Pthread_mutex_unlock(&m_lock);
+
 		tptr[i].thread_count++;
 		str_echo(connfd);
 		Close(connfd);

@@ -71,6 +71,8 @@ void Pthread_mutex_unlock(pthread_mutex_t *mptr);
 void Pthread_create(pthread_t *tid, const pthread_attr_t *attr, void * (*func)(void *), void *arg);
 void Pthread_join(pthread_t tid, void **status);
 void Pthread_detach(pthread_t tid);
+void Pthread_cond_signal(pthread_cond_t *cptr);
+void Pthread_cond_wait(pthread_cond_t *cptr, pthread_mutex_t *mptr);
 
 void Dup2(int fd1, int fd2);
 
