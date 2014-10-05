@@ -42,4 +42,13 @@ struct Child{
 pid_t child_make_for_pipe(int i, int listenfd, int addrlen);
 void child_main_for_pipe(int i, int listenfd, int addrlen);
 
+// 线程池处理
+typedef struct {
+	pthread_t thread_tid;
+	long thread_count;
+} Thread;
+
+void thread_make(int i);
+void* thread_main(void* arg);
+
 #endif

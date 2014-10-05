@@ -10,6 +10,11 @@ pthread_mutex_t *mptr;
 
 Child *cptr;
 
+Thread	* tptr;
+int listenfd, nthreads;
+socklen_t addrlen;
+pthread_mutex_t m_lock = PTHREAD_MUTEX_INITIALIZER;
+
 // 此处的 host 也可以是 ipaddress，如果为 null 则是本机 127.0.0.1，szServName 也可以是 port
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 {
@@ -313,5 +318,32 @@ void child_main_for_pipe(int i, int listenfd, int addrlen)
 		str_echo(connfd);
 		Close(connfd);
 		Write(STDERR_FILENO, "", 1);	// tell father , child is finish the net request
+	}
+}
+
+void thread_make(int i)
+{
+	Pthread_create(&tptr[i].thread_tid, NULL, &thread_main, (void *)&i);
+	return;
+}
+
+void* thread_main(void* arg)
+{
+	int i = *((int *)arg);
+	int connfd;
+	socklen_t clilen;
+	struct sockaddr* cliaddr;
+	cliaddr = (sockaddr*)Malloc(addrlen);
+
+	printf("pthread %d statring\n", i);
+	for(; ;)
+	{
+		clilen = addrlen;
+		Pthread_mutex_lock(&m_lock);
+		connfd = Accept(listenfd, cliaddr, &addrlen);
+		Pthread_mutex_unlock(&m_lock);
+		tptr[i].thread_count++;
+		str_echo(connfd);
+		Close(connfd);
 	}
 }

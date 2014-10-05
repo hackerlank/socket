@@ -5,7 +5,7 @@ APP_DIR = ./app
 
 CFLAGS = -g #-v
 
-all: client svr1 svr2 svr3 svr4 svr5 svr6 svr7 
+all: client svr1 svr2 svr3 svr4 svr5 svr6 svr7 svr8 
 .PHONY:all
 
 # client.app
@@ -63,6 +63,13 @@ svr7: svr7.o base error svr_header
 
 svr7.o: $(SRC_DIR)/svr/svr7.cpp
 	cc $(CFLAGS) -o $(OBJ_DIR)/svr7.o -c $(SRC_DIR)/svr/svr7.cpp
+
+#svr8 服务器预先派生一组进程，通过双工管道传递 connfd，并且还通过对管道装态的设置，再使用 select 读取，完成父子之间的通讯
+svr8: svr8.o base error svr_header
+	cc $(CFLAGS) -o $(APP_DIR)/svr8.app $(OBJ_DIR)/svr8.o $(OBJ_DIR)/base.o $(OBJ_DIR)/error.o $(OBJ_DIR)/svr_header.o
+
+svr8.o: $(SRC_DIR)/svr/svr8.cpp
+	cc $(CFLAGS) -o $(OBJ_DIR)/svr8.o -c $(SRC_DIR)/svr/svr8.cpp
 
 svr_header: $(SRC_DIR)/svr/svr_header.cpp
 	cc $(CFLAGS) -c $(SRC_DIR)/svr/svr_header.cpp -o $(OBJ_DIR)/svr_header.o
