@@ -24,8 +24,8 @@ void file_lock_release();
 void child_main_for_file_lock(int i, int listenfd, int addrlen);
 pid_t child_make_for_file_lock(int i, int listenfd, int addrlen);
 
-// 这里是关于 accept 开启线程后的线程加锁
-void pthread_lock_init(char* pathname);	// 记得线程是放置在一个地方的
+// 这里是关于 accept 开启进程后的线程加锁
+void pthread_lock_init(char* pathname);	// 记得线程是放置在一个地方的，所以这个给予了一个路径
 void pthread_lock_wait();
 void pthread_lock_release();
 void child_main_for_pthread_lock(int i, int listenfd, int addrlen);	// 如何共有这一段代码
