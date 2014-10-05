@@ -54,7 +54,8 @@ int main(int argc, char **argv)
 					break;				/* available */
 
 			if (i == nchildren)
-				err_quit("no available children");
+				err_quit("no available children");	// 没有多余的子链接的时候，关闭此次请求
+
 			cptr[i].child_status = 1;	/* mark child as busy */
 			cptr[i].child_count++;
 			navail--;

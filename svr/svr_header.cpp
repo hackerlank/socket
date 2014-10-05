@@ -281,9 +281,9 @@ pid_t child_make_for_pipe(int i, int listenfd, int addrlen)
 	{
 		// parent
 		Close(sockfd[1]);	// 父进程使用 sockfd[0]
-		/* cptr[i].child_pid = pid; */
-		/* cptr[i].child_pipefd = sockfd[0]; */
-		/* cptr[i].child_status = 0; */
+		cptr[i].child_pid = pid;
+		cptr[i].child_pipefd = sockfd[0];
+		cptr[i].child_status = 0;
 		return (pid);
 	}
 
