@@ -26,7 +26,7 @@ KListen:~KListen()
 // port used 4 
 // socket handle used 5
 // create socket handle fail 6
-// set socket reuse value fail 7
+// set socket handle opt fail 7
 // bind socket fail 8
 // 参数
 // szIP 传入的 IP 地址，不允许为空，支持添"0.0.0.0"时，自动分配
@@ -35,7 +35,7 @@ int KListen:Listen(const char* szIP, int nPort)
 {
 	int nRet = 1;
 	int errcode = 0;
-	int nReuse = 1;
+	int nOptRet = 0;
 	sockaddr_in sAddr;
 	sAddr.sin_family = AF_INET;
 
@@ -62,9 +62,10 @@ int KListen:Listen(const char* szIP, int nPort)
 	m_hSocket = socket(AF_INET, SOCKET_STREAM, IPPROTO_TCP);
 	KF_PROCESS_ERROR(m_hSocket != INVALID_SOCKET);
 
-	// set socket handle reuse value
+	// set socket handle opt
 	nRet = 7;
-	KF_PROCESS_ERROR(setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&nReuse, sizeof(nReuse)) != SOCKET_ERROR);
+	nOptRet = _SetSocketOpt();
+	KF_PROCESS_ERROR(nOptRet == 0);
 
 	// set ip
 	if (m_dwLocalIP != 0) {
@@ -95,14 +96,75 @@ ExitFailed:
 }
 
 // success 0
+// socket handle error 1
+// set handle nonblock fail 2
+// set handle reuse state fail 3
+// set tcp nodelay fail 4
+int KListen:_SetSocketOpt() {
+	int nRet = 1;
+	unsigned int uParam = 1;
+	int nBlockFlag = 0;
+	int nReuse = 1;
+	int nDelayFlag = 1;
+
+	// check socket handle
+	KF_PROCESS_ERROR(m_hSocket != INVALID_SOCKET);
+
+	// set handle nonblock
+	nRet = 2;
+#ifdef WIN32
+	KF_PROCESS_ERROR(ioctlsocket(m_hSocket, FIONBIO, (u_long *)&uParam) != SOCKET_ERROR);
+#endif
+
+#ifdef LINUX
+	nBlockFlag = fcntl(m_hSocket, F_GETFL, 0);
+	KF_PROCESS_ERROR(nFlag != -1);
+	nBlockFlag |= O_NONBLOCK;
+	fcntl(m_hSocket, F_SETFL, nBlockFlag);
+#endif
+
+	// set socket handle reuse : this is useful to handle TIME_WAIT
+	nRet = 3;
+	KF_PROCESS_ERROR(setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&nReuse, sizeof(nReuse)) != SOCKET_ERROR);
+
+	// set tcp nodelay
+	nRet = 4;
+	KF_PROCESS_ERROR(setsockopt(m_hSocket, IPPROTO_TCP, TCP_NODELAY, (char *)&nDelayFlag, sizeof(nDelayFlag)) != SOCKET_ERROR);
+
+	nRet = 0;
+ExitFailed:
+	return nRet;
+}
+
+// success 0
 // alreadystop 1
 int KListen:StopListen()
 {
+	int nRet = 1;
+	// check stop state
+	KF_PROCESS_ERROR(m_uStop == KE_LISTEN_LIVE);
+
 	// clear socket handle
+	if (m_hSocket != INVALID_SOCKET)	// 容错，应该必须是 INVALID_SOCKET
+	{
+		close(m_hSocket);
+		m_hSocket = INVALID_SOCKET;
+	}
 	
 	// clear thread handle
+	if (m_hThread)
+	{
+		m_hThread->Terminate();
+		delete m_hThread;
+		m_hThread = NULL;
+	}
 	
 	// 设置 m_uStop 为 stop
+	m_uStop = KE_LISTEN_STOP;
+	
+	nRet = 0;
+ExitFailed:
+	return nRet;
 }
 
 void KListen:WorkThread(void *pThis)
@@ -118,22 +180,31 @@ void KListen:WorkThread(void *pThis)
 	// check for state
 	KF_PROCESS_ERROR(pWork->m_uStop != KE_LISTEN_STOP);
 
-	FD_ZERO(&sProcessSet);
-	FD_SET(pWork->m_hSocket, &sProcessSet);
+	for (;;)
+	{
+		FD_ZERO(&sProcessSet);
+		FD_SET(pWork->m_hSocket, &sProcessSet);
 
-	FD_ZERO(&sFailSet);
-	FD_SET(pWork->m_hSocket, &sFailSet);
-	
-	nSelectRet = select(pWork->m_hSocket + 1, &sProcessSet, NULL, &sFailSet, &sTimeVal);	// ？是否是立即返回
-	if (nSelectRet == SOCKET_ERROR || FD_ISSET(pWork->m_hSocket, &sFailSet))
-	{
-		pWork->ListenFail();
-	}
-	else
-	{
-		pWork->ListenSuccess();
+		FD_ZERO(&sFailSet);
+		FD_SET(pWork->m_hSocket, &sFailSet);
+
+		nSelectRet = select(pWork->m_hSocket + 1, &sProcessSet, NULL, &sFailSet, &sTimeVal);	// ？是否是立即返回
+		if (nSelectRet == SOCKET_ERROR || FD_ISSET(pWork->m_hSocket, &sFailSet))
+		{
+			pWork->ListenFail();
+		}
+		else
+		{
+			pWork->ListenSuccess();
+		}
 	}
 
 ExitFailed:
 	return;
+}
+
+
+int KListen:ListenSuccess()
+{
+
 }

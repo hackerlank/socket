@@ -21,6 +21,9 @@ class KListen
 
 		void WorkThread(void* pThis);
 
+	private:
+		int _SetSocketOpt();
+
 		int ListenFail();
 		int ListenSuccess();
 
