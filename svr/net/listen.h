@@ -11,6 +11,8 @@ class KListen
 			KE_LISTEN_STOP = 0,
 			KE_LISTEN_LIVE = 1,
 		};
+		enum MAX_PEND_NUMBER = 128;
+
 		KListen();
 		~KListen();
 
@@ -18,6 +20,9 @@ class KListen
 		int StopListen();
 
 		void WorkThread(void* pThis);
+
+		int ListenFail();
+		int ListenSuccess();
 
 	private:
 		KThread *m_hThread;
