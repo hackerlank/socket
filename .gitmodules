@@ -1,0 +1,3 @@
+[submodule "thread"]
+	path = thread
+	url = http://github.com/izerocrazy/thread.git

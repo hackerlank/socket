@@ -19,6 +19,7 @@ int clifd[MAXCLI], iget, iput;
 pthread_cond_t clifd_cond = PTHREAD_COND_INITIALIZER;
 
 // 此处的 host 也可以是 ipaddress，如果为 null 则是本机 127.0.0.1，szServName 也可以是 port
+// 返回值是 listenfd
 int Tcp_listen(const char* host, const char* serv, socklen_t* addrlenp)
 {
 	int listenfd, n;
