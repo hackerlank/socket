@@ -14,7 +14,9 @@ int main()
 void TestListen()
 {
 	KListen* pl = new KListen();
-	pl->Listen("127.0.0.0", 8080);	//  IP Error
+	int errorcode;
+	errorcode = pl->Listen("127.0.0.0", 8080);	//  IP Error
+	if(errorcode != )
 
 	pl->Listen("127.0.0.1", 0);	// Part Error
 

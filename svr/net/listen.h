@@ -31,10 +31,15 @@ class KListen
 		KThread *m_hThread;
 		unsigned int m_uStop;
 
+		// Socket Data
 	private:
 		unsigned long m_dwLocalIP;
 		unsigned int m_nPort;
 		unsigned int m_hSocket;
+
+		// Socket List
+		unsigned int m_hAcceptSocket[1000];
+		unsigned int m_nLastOne;
 }
 
 #endif

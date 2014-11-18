@@ -6,6 +6,7 @@ KListen:KListen()
 	m_uStop = KE_LISTEN_STOP;
 	m_hThread = NULL;
 	m_hSocket = INVALID_SOCKET;
+	m_nLastOne = 0;
 }
 
 KListen:~KListen()
@@ -78,13 +79,16 @@ int KListen:Listen(const char* szIP, int nPort)
 	m_nPort = nPort;
 	sAddr.sin_port = htons(nPort);
 
-	// bind
+	// set bind
 	nRet = 8;
 	KF_PROCESS_ERROR(bind(m_hSocket, (sockaddr*)sAddr, sizeof(sAddr)) != SOCKET_ERROR);
 
-	// listen
+	// set listen
 	nRet = 9;
 	KF_PROCESS_ERROR(listen(m_hSocket, MAX_PEND_NUMBER) != SOCKET_ERROR);
+
+	// set accept list
+	m_nLastOne = 0;
 
 	m_hThread = new KThread();
 	errcode = m_hThread->Create(WorkThread, this);
@@ -145,7 +149,7 @@ int KListen:StopListen()
 	KF_PROCESS_ERROR(m_uStop == KE_LISTEN_LIVE);
 
 	// clear socket handle
-	if (m_hSocket != INVALID_SOCKET)	// 容错，应该必须是 INVALID_SOCKET
+	if (m_hSocket != INVALID_SOCKET)	// 容错，应该必须不是 INVALID_SOCKET
 	{
 		close(m_hSocket);
 		m_hSocket = INVALID_SOCKET;
@@ -157,6 +161,13 @@ int KListen:StopListen()
 		m_hThread->Terminate();
 		delete m_hThread;
 		m_hThread = NULL;
+	}
+
+	// clear accept socket handle
+	while (m_nLastOne >= 0)
+	{
+		close(m_hAcceptSocket[m_nLastOne]);
+		m_nLastOne--;
 	}
 	
 	// 设置 m_uStop 为 stop
@@ -180,6 +191,9 @@ void KListen:WorkThread(void *pThis)
 	// check for state
 	KF_PROCESS_ERROR(pWork->m_uStop != KE_LISTEN_STOP);
 
+	// check for socket
+	KF_PROCESS_ERROR(pWork->m_hSocket != INVALID_SOCKET);
+
 	for (;;)
 	{
 		FD_ZERO(&sProcessSet);
@@ -193,7 +207,7 @@ void KListen:WorkThread(void *pThis)
 		{
 			pWork->ListenFail();
 		}
-		else
+		else if (FD_ISSET(pWork->m_hSocket, &sProcessSet))
 		{
 			pWork->ListenSuccess();
 		}
@@ -203,8 +217,63 @@ ExitFailed:
 	return;
 }
 
-
+// accept
+// 返回值
+// success 0
+// socket handle error 1
+// max accept socket 2
 int KListen:ListenSuccess()
 {
+	unsigned int hAcceptSocket;
+	sockaddr_in sAddr;
+	int nRet = 1;
 
+#ifdef WIN32
+	int nErrorCode;
+	int nAddrLen;
+	nAddrLen = sizeof(sAddr);
+#endif
+
+#ifdef LINUX
+	socklen_t nAddrLen;
+	nAddrLen = (socklen_t)sizeof(sAddr);
+#endif
+
+	KF_PROCESS_ERROR(m_hSocket != INVALID_SOCKET);
+
+	nRet = 2;
+	KF_PROCESS_ERROR(m_nLastOne < 1000);
+
+	hAcceptSocket = accept(m_hSocket, (sockaddr*)&sAddr, &nAddrLen);
+	if (hAcceptSocket == INVALID_SOCKET) 
+	{
+#ifdef WIN32
+		nErrorCode = WSAGetLastError();
+		if (nErrorCode != WSAEWOULDBLOCK)
+		{
+			ListenFail();
+		}
+#endif
+#ifdef LINUX
+		if (errno != EINPROGRESS && errno != EAGAIN)
+		{
+			ListenFail();
+		}
+#endif
+	}
+	else
+	{
+		m_hAcceptSocket[m_nLastOne] = hAcceptSocket;
+		m_nLastOne ++;
+	}
+
+	nRet = 0;
+ExitFailed:
+	return nRet;
+}
+
+int KListen::ListenFail()
+{
+	StopListen();
+	return 0;
 }
