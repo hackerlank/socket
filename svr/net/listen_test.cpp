@@ -16,22 +16,29 @@ void TestListen()
 	KListen* pl = new KListen();
 	int errorcode;
 	errorcode = pl->Listen("127.0.0.0", 8080);	//  IP Error
-	if(errorcode != )
+	if(errorcode != 1)
+	{
+		K_ERROR_SYS("listen error : %d", errorcode);
+	}
 
-	pl->Listen("127.0.0.1", 0);	// Part Error
+	errorcode = pl->Listen("127.0.0.1", 0);	// Part Error
+	if (errorcode != 2)
+	{
+		K_ERROR_SYS("Listen error: %d", errorcode);
+	}
 
-	pl->Listen("127.0.0.1", 8080);	// success
+	errorcode = pl->Listen("127.0.0.1", 8080);	// success
 
-	pl->Listen("127.0.0.1", 8080);	// 已经起动
+	errorcode = pl->Listen("127.0.0.1", 8080);	// 已经起动
 
 	KListen* pl2 = new KListen();
-	pl->Listen("127.0.0.1", 8080);	// Part already use
+	errorcode = pl->Listen("127.0.0.1", 8080);	// Part already use
 
 	delete pl;
 	delete pl2;
 
 	pl = new KListen();
-	pl->Listen("127.0.0.1", 8080);	// 应该也是 success，但注意这里面有可能会遇上 WAIT 这个状态
+	errorcode = pl->Listen("127.0.0.1", 8080);	// 应该也是 success，但注意这里面有可能会遇上 WAIT 这个状态
 }
 
 void TestStopListen()
